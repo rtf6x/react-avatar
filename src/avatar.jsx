@@ -31,7 +31,7 @@ class Avatar extends React.Component {
     },
     onBeforeFileLoad: () => {
     },
-    label: 'Choose a file',
+    label: `Drag'&Drop/Choose a file`,
     labelStyle: {
       fontSize: '1.25em',
       fontWeight: '700',
@@ -53,6 +53,8 @@ class Avatar extends React.Component {
     const containerId = this.generateHash('avatar_container');
     const loaderId = this.generateHash('avatar_loader');
     this.onFileLoad = this.onFileLoad.bind(this);
+    this.onDragFile = this.onDragFile.bind(this);
+    this.onDropFile = this.onDropFile.bind(this);
     this.onCloseClick = this.onCloseClick.bind(this);
     this.state = {
       imgWidth: 0,
@@ -176,28 +178,54 @@ class Avatar extends React.Component {
     })
   }
 
+  onDragFile(evt) { evt.preventDefault(); }
+
+  onDropFile(evt) {
+    evt.preventDefault();
+    this.onBeforeFileLoadCallback(evt);
+
+    if (evt.dataTransfer.items && evt.dataTransfer.items.length >= 0) {
+      const file = evt.dataTransfer.items[0].getAsFile();
+      this.onFileLoadCallback(file);
+
+      const ref = this;
+      EXIF.getData(file, function () {
+        let exifOrientation = EXIF.getTag(this, "Orientation");
+        LoadImage(
+          file,
+          function (image, data) {
+            ref.setState({ image, file, showLoader: false });
+            ref.init();
+          },
+          { orientation: exifOrientation, meta: true }
+        );
+      });
+    }
+  }
+
   onFileLoad(e) {
     e.preventDefault();
-
+    console.log(this);
     this.onBeforeFileLoadCallback(e);
-    if(!e.target.value) return;
+
+    if (!e.target.value) return;
 
     let file = e.target.files[0];
 
     this.onFileLoadCallback(file);
 
     const ref = this;
-    EXIF.getData(file, function() {
+    EXIF.getData(file, function () {
       let exifOrientation = EXIF.getTag(this, "Orientation");
       LoadImage(
         file,
         function (image, data) {
-          ref.setState({ image, file, showLoader: false});
+          ref.setState({ image, file, showLoader: false });
           ref.init();
         },
-        {orientation: exifOrientation, meta: true}
+        { orientation: exifOrientation, meta: true }
       );
-    })
+    });
   }
 
   onCloseClick() {
@@ -482,35 +510,37 @@ class Avatar extends React.Component {
 
     return (
       <div>
-        {
-          this.state.showLoader
-            ? <div style={borderStyle}>
-              <input
-                onChange={(e) => this.onFileLoad(e)}
-                name={this.loaderId} type="file"
-                id={this.loaderId}
-                style={inputStyle}
-                accept={this.mimeTypes}
-              />
-              <label htmlFor={this.loaderId} style={labelStyle}>{label}</label>
-            </div>
-            : <div style={style}>
-              <svg
-                onClick={this.onCloseClick}
-                style={closeBtnStyle}
-                viewBox="0 0 475.2 475.2"
-                width="20px" height="20px">
-                <g>
-                  <path
-                    d="M405.6,69.6C360.7,24.7,301.1,0,237.6,0s-123.1,24.7-168,69.6S0,174.1,0,237.6s24.7,123.1,69.6,168s104.5,69.6,168,69.6    s123.1-24.7,168-69.6s69.6-104.5,69.6-168S450.5,114.5,405.6,69.6z M386.5,386.5c-39.8,39.8-92.7,61.7-148.9,61.7    s-109.1-21.9-148.9-61.7c-82.1-82.1-82.1-215.7,0-297.8C128.5,48.9,181.4,27,237.6,27s109.1,21.9,148.9,61.7    C468.6,170.8,468.6,304.4,386.5,386.5z"
-                    fill={this.closeIconColor} />
-                  <path
-                    d="M342.3,132.9c-5.3-5.3-13.8-5.3-19.1,0l-85.6,85.6L152,132.9c-5.3-5.3-13.8-5.3-19.1,0c-5.3,5.3-5.3,13.8,0,19.1    l85.6,85.6l-85.6,85.6c-5.3,5.3-5.3,13.8,0,19.1c2.6,2.6,6.1,4,9.5,4s6.9-1.3,9.5-4l85.6-85.6l85.6,85.6c2.6,2.6,6.1,4,9.5,4    c3.5,0,6.9-1.3,9.5-4c5.3-5.3,5.3-13.8,0-19.1l-85.4-85.6l85.6-85.6C347.6,146.7,347.6,138.2,342.3,132.9z"
-                    fill={this.closeIconColor} />
-                </g>
-              </svg>
-              <div id={this.containerId} />
-            </div>
+        {this.state.showLoader
+          ?
+          <div style={borderStyle} onDragOver={this.onDragFile} onDrop={this.onDropFile}>
+            <input
+              onChange={this.onFileLoad}
+              name={this.loaderId}
+              type="file"
+              id={this.loaderId}
+              style={inputStyle}
+              accept={this.mimeTypes}
+            />
+            <label htmlFor={this.loaderId} style={labelStyle}>{label}</label>
+          </div>
+          :
+          <div style={style}>
+            <svg
+              onClick={this.onCloseClick}
+              style={closeBtnStyle}
+              viewBox="0 0 475.2 475.2"
+              width="20px" height="20px">
+              <g>
+                <path
+                  d="M405.6,69.6C360.7,24.7,301.1,0,237.6,0s-123.1,24.7-168,69.6S0,174.1,0,237.6s24.7,123.1,69.6,168s104.5,69.6,168,69.6    s123.1-24.7,168-69.6s69.6-104.5,69.6-168S450.5,114.5,405.6,69.6z M386.5,386.5c-39.8,39.8-92.7,61.7-148.9,61.7    s-109.1-21.9-148.9-61.7c-82.1-82.1-82.1-215.7,0-297.8C128.5,48.9,181.4,27,237.6,27s109.1,21.9,148.9,61.7    C468.6,170.8,468.6,304.4,386.5,386.5z"
+                  fill={this.closeIconColor} />
+                <path
+                  d="M342.3,132.9c-5.3-5.3-13.8-5.3-19.1,0l-85.6,85.6L152,132.9c-5.3-5.3-13.8-5.3-19.1,0c-5.3,5.3-5.3,13.8,0,19.1    l85.6,85.6l-85.6,85.6c-5.3,5.3-5.3,13.8,0,19.1c2.6,2.6,6.1,4,9.5,4s6.9-1.3,9.5-4l85.6-85.6l85.6,85.6c2.6,2.6,6.1,4,9.5,4    c3.5,0,6.9-1.3,9.5-4c5.3-5.3,5.3-13.8,0-19.1l-85.4-85.6l85.6-85.6C347.6,146.7,347.6,138.2,342.3,132.9z"
+                  fill={this.closeIconColor} />
+              </g>
+            </svg>
+            <div id={this.containerId} />
+          </div>
         }
       </div>
     )
