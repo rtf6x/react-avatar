@@ -205,13 +205,10 @@ class Avatar extends React.Component {
 
   onFileLoad(e) {
     e.preventDefault();
-    console.log(this);
+
     this.onBeforeFileLoadCallback(e);
-
     if (!e.target.value) return;
-
     let file = e.target.files[0];
-
     this.onFileLoadCallback(file);
 
     const ref = this;
@@ -491,13 +488,12 @@ class Avatar extends React.Component {
 
     const label = this.props.label;
 
-    const labelStyle = { ...this.props.labelStyle, ...{ lineHeight: (height || 200) + 'px' } };
+    const labelStyle = { ...this.props.labelStyle, lineHeight: `${(height || 200)}px` };
 
     const borderStyle = {
-      ...this.props.borderStyle, ...{
-        width: width || 200,
-        height: height || 200
-      }
+      ...this.props.borderStyle,
+      width: width || 200,
+      height: height || 200
     };
 
     const closeBtnStyle = {
