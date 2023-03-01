@@ -1,13 +1,13 @@
-import React from 'react'
-import Konva from 'konva/src/Core'
-import EXIF from 'exif-js'
-import LoadImage from 'blueimp-load-image'
-import 'konva/src/shapes/Image'
-import 'konva/src/shapes/Circle'
-import 'konva/src/shapes/Rect'
-import 'konva/src/shapes/Path'
-import 'konva/src/Animation'
-import 'konva/src/DragAndDrop'
+import React from 'react';
+import Konva from 'konva/src/Core';
+import EXIF from 'exif-js_fixed';
+import LoadImage from 'blueimp-load-image';
+import 'konva/src/shapes/Image';
+import 'konva/src/shapes/Circle';
+import 'konva/src/shapes/Rect';
+import 'konva/src/shapes/Path';
+import 'konva/src/Animation';
+import 'konva/src/DragAndDrop';
 
 class Avatar extends React.Component {
 
@@ -23,6 +23,7 @@ class Avatar extends React.Component {
     exportAsSquare: false,
     exportSize: undefined,
     exportMimeType: 'image/png',
+    cropShape: 'circle',
     exportQuality: 1.0,
     mobileScaleSpeed: 0.5, // experimental
     onClose: () => {
@@ -49,7 +50,14 @@ class Avatar extends React.Component {
       borderStyle: 'dashed',
       borderRadius: '8px',
       textAlign: 'center'
-    }
+    },
+    closeButtonStyle: {
+      position: 'absolute',
+      zIndex: 999,
+      cursor: 'pointer',
+      left: '10px',
+      top: '10px'
+    },
   };
 
   constructor(props) {
@@ -68,104 +76,132 @@ class Avatar extends React.Component {
       loaderId,
       lastMouseY: 0,
       showLoader: !(this.props.src || this.props.img)
-    }
+    };
   }
 
   get lineWidth() {
-    return this.props.lineWidth
+    return this.props.lineWidth;
   }
 
   get containerId() {
-    return this.state.containerId
+    return this.state.containerId;
   }
 
   get closeIconColor() {
-    return this.props.closeIconColor
+    return this.props.closeIconColor;
+  }
+
+  get closeIcon() {
+    const { closeIcon } = this.props;
+    if (closeIcon) {
+      return closeIcon;
+    }
+
+    return (
+      <svg
+        viewBox="0 0 475.2 475.2"
+        width="20px"
+        height="20px"
+      >
+        <g>
+          <path
+            d="M405.6,69.6C360.7,24.7,301.1,0,237.6,0s-123.1,24.7-168,69.6S0,174.1,0,237.6s24.7,123.1,69.6,168s104.5,69.6,168,69.6    s123.1-24.7,168-69.6s69.6-104.5,69.6-168S450.5,114.5,405.6,69.6z M386.5,386.5c-39.8,39.8-92.7,61.7-148.9,61.7    s-109.1-21.9-148.9-61.7c-82.1-82.1-82.1-215.7,0-297.8C128.5,48.9,181.4,27,237.6,27s109.1,21.9,148.9,61.7    C468.6,170.8,468.6,304.4,386.5,386.5z"
+            fill={this.closeIconColor}/>
+          <path
+            d="M342.3,132.9c-5.3-5.3-13.8-5.3-19.1,0l-85.6,85.6L152,132.9c-5.3-5.3-13.8-5.3-19.1,0c-5.3,5.3-5.3,13.8,0,19.1    l85.6,85.6l-85.6,85.6c-5.3,5.3-5.3,13.8,0,19.1c2.6,2.6,6.1,4,9.5,4s6.9-1.3,9.5-4l85.6-85.6l85.6,85.6c2.6,2.6,6.1,4,9.5,4    c3.5,0,6.9-1.3,9.5-4c5.3-5.3,5.3-13.8,0-19.1l-85.4-85.6l85.6-85.6C347.6,146.7,347.6,138.2,342.3,132.9z"
+            fill={this.closeIconColor}/>
+        </g>
+      </svg>
+    );
   }
 
   get cropColor() {
-    return this.props.cropColor
+    return this.props.cropColor;
   }
 
   get loaderId() {
-    return this.state.loaderId
+    return this.state.loaderId;
   }
 
   get mimeTypes() {
-    return this.props.mimeTypes
+    return this.props.mimeTypes;
   }
 
   get backgroundColor() {
-    return this.props.backgroundColor
+    return this.props.backgroundColor;
+  }
+
+  get cropShape() {
+    return this.props.cropShape;
   }
 
   get shadingColor() {
-    return this.props.shadingColor
+    return this.props.shadingColor;
   }
 
   get shadingOpacity() {
-    return this.props.shadingOpacity
+    return this.props.shadingOpacity;
   }
 
   get mobileScaleSpeed() {
-    return this.props.mobileScaleSpeed
+    return this.props.mobileScaleSpeed;
   }
 
   get cropRadius() {
-    return this.state.cropRadius
+    return this.state.cropRadius;
   }
 
   get minCropRadius() {
-    return this.props.minCropRadius
+    return this.props.minCropRadius;
   }
 
   get scale() {
-    return this.state.scale
+    return this.state.scale;
   }
 
   get width() {
-    return this.state.imgWidth
+    return this.state.imgWidth;
   }
 
   get halfWidth() {
-    return this.state.imgWidth / 2
+    return this.state.imgWidth / 2;
   }
 
   get height() {
-    return this.state.imgHeight
+    return this.state.imgHeight;
   }
 
   get halfHeight() {
-    return this.state.imgHeight / 2
+    return this.state.imgHeight / 2;
   }
 
   get image() {
-    return this.state.image
+    return this.state.image;
   }
 
   generateHash(prefix) {
     const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-    return prefix + '-' + s4() + '-' + s4() + '-' + s4()
+    return prefix + '-' + s4() + '-' + s4() + '-' + s4();
   }
 
   onCloseCallback() {
-    this.props.onClose()
+    this.props.onClose();
   }
 
   onCropCallback(img) {
-    this.props.onCrop(img)
+    this.props.onCrop(img);
   }
 
   onFileLoadCallback(file) {
-    this.props.onFileLoad(file)
+    this.props.onFileLoad(file);
   }
 
   onBeforeFileLoadCallback(elem) {
-    this.props.onBeforeFileLoad(elem)
+    this.props.onBeforeFileLoad(elem);
   }
 
   onImageLoadCallback(image) {
-    this.props.onImageLoad(image)
+    this.props.onImageLoad(image);
   }
 
   componentDidMount() {
@@ -178,12 +214,14 @@ class Avatar extends React.Component {
       if (this.image.complete) return this.init();
       this.image.onload = () => {
         this.onImageLoadCallback(this.image);
-        this.init()
-      }
-    })
+        this.init();
+      };
+    });
   }
 
-  onDragFile(evt) { evt.preventDefault(); }
+  onDragFile(evt) {
+    evt.preventDefault();
+  }
 
   onDropFile(evt) {
     evt.preventDefault();
@@ -195,7 +233,7 @@ class Avatar extends React.Component {
 
       const ref = this;
       EXIF.getData(file, function () {
-        let exifOrientation = EXIF.getTag(this, "Orientation");
+        let exifOrientation = EXIF.getTag(this, 'Orientation');
         LoadImage(
           file,
           function (image, data) {
@@ -218,7 +256,7 @@ class Avatar extends React.Component {
 
     const ref = this;
     EXIF.getData(file, function () {
-      let exifOrientation = EXIF.getTag(this, "Orientation");
+      let exifOrientation = EXIF.getTag(this, 'Orientation');
       LoadImage(
         file,
         function (image, data) {
@@ -231,7 +269,7 @@ class Avatar extends React.Component {
   }
 
   onCloseClick() {
-    this.setState({ showLoader: true }, () => this.onCloseCallback())
+    this.setState({ showLoader: true }, () => this.onCloseCallback());
   }
 
   init() {
@@ -266,7 +304,7 @@ class Avatar extends React.Component {
       imgHeight,
       scale,
       cropRadius: calculatedRadius
-    }, this.initCanvas)
+    }, this.initCanvas);
   }
 
   initCanvas() {
@@ -290,73 +328,106 @@ class Avatar extends React.Component {
 
     stage.add(layer);
 
-    const scaledRadius = (scale = 0) => crop.radius() - scale;
-    const isLeftCorner = scale => crop.x() - scaledRadius(scale) < 0;
-    const calcLeft = () => crop.radius() + 1;
-    const isTopCorner = scale => crop.y() - scaledRadius(scale) < 0;
-    const calcTop = () => crop.radius() + 1;
-    const isRightCorner = scale => crop.x() + scaledRadius(scale) > stage.width();
-    const calcRight = () => stage.width() - crop.radius() - 1;
-    const isBottomCorner = scale => crop.y() + scaledRadius(scale) > stage.height();
-    const calcBottom = () => stage.height() - crop.radius() - 1;
-    const isNotOutOfScale = scale => !isLeftCorner(scale) && !isRightCorner(scale) && !isBottomCorner(scale) && !isTopCorner(scale);
-    const calcScaleRadius = scale => scaledRadius(scale) >= this.minCropRadius ? scale : crop.radius() - this.minCropRadius;
-    const calcResizerX = x => x + (crop.radius() * 0.86);
-    const calcResizerY = y => y - (crop.radius() * 0.5);
+    let scaledRadius, calcLeft, calcTop, calcRight, calcBottom, calcScaleRadius, calcResizerX, calcResizerY,
+      isLeftCorner, isTopCorner, isRightCorner, isBottomCorner, isNotOutOfScale;
+    if (this.cropShape === 'rect') {
+      scaledRadius = (scale = 0) => crop.width() - scale;
+      calcLeft = () => 1;
+      calcTop = () => 1;
+      calcRight = () => stage.width() - crop.width() - 1;
+      calcBottom = () => stage.height() - crop.height() - 1;
+      calcScaleRadius = scale => scaledRadius(scale) >= this.minCropRadius ? scale : 0;
+      calcResizerX = () => crop.x() + crop.width();
+      calcResizerY = () => crop.y();
+      isLeftCorner = () => crop.x() <= 0;
+      isTopCorner = () => crop.y() <= 0;
+      isRightCorner = () => crop.x() + crop.width() >= stage.width();
+      isBottomCorner = () => crop.y() + crop.height() >= stage.height();
+      isNotOutOfScale = scale => !isLeftCorner(scale) && !isRightCorner(scale) && !isBottomCorner(scale) && !isTopCorner(scale);
+    } else {
+      scaledRadius = (scale = 0) => crop.radius() - scale;
+      calcLeft = () => crop.radius() + 1;
+      calcTop = () => crop.radius() + 1;
+      calcRight = () => stage.width() - crop.radius() - 1;
+      calcBottom = () => stage.height() - crop.radius() - 1;
+      calcScaleRadius = scale => scaledRadius(scale) >= this.minCropRadius ? scale : crop.radius() - this.minCropRadius;
+      calcResizerX = x => x + (crop.radius() * 0.86);
+      calcResizerY = y => y - (crop.radius() / 2);
+      isLeftCorner = scale => crop.x() - scaledRadius(scale) < 0;
+      isTopCorner = scale => crop.y() - scaledRadius(scale) < 0;
+      isRightCorner = scale => crop.x() + scaledRadius(scale) > stage.width();
+      isBottomCorner = scale => crop.y() + scaledRadius(scale) > stage.height();
+      isNotOutOfScale = scale => !isLeftCorner(scale) && !isRightCorner(scale) && !isBottomCorner(scale) && !isTopCorner(scale);
+    }
     const moveResizer = (x, y) => {
       resize.x(calcResizerX(x) - 8);
       resize.y(calcResizerY(y) - 8);
       resizeIcon.x(calcResizerX(x) - 8);
-      resizeIcon.y(calcResizerY(y) - 10)
+      resizeIcon.y(calcResizerY(y) - 10);
     };
 
     const getPreview = () => {
-      if(this.props.exportAsSquare) {
-        const fullSizeImage = new Konva.Image({ image: this.image });
-        const xScale = fullSizeImage.width() / background.width();
-        const yScale = fullSizeImage.height() / background.height();
-
-        const width = crop.radius() * 2 * xScale;
-        const height = crop.radius() * 2 * yScale;
-        const pixelRatio = this.props.exportSize ? this.props.exportSize / width : undefined;
-
-        return fullSizeImage.toDataURL({
-          x: (crop.x() - crop.radius()) * xScale,
-          y: (crop.y() - crop.radius())  * yScale,
-          width,
-          height,
-          pixelRatio,
-          mimeType: this.props.exportMimeType,
-          quality: this.props.exportQuality
-        });
+      let cropWidth, cropHeight, cropX, cropY;
+      if (this.cropShape === 'rect') {
+        cropWidth = crop.width();
+        cropHeight = crop.height();
+        cropX = crop.x();
+        cropY = crop.y();
       } else {
-        const width = crop.radius() * 2;
-        const height = crop.radius() * 2;
-        const pixelRatio = this.props.exportSize ? this.props.exportSize / width : undefined;
-
-        return crop.toDataURL({
-          x: crop.x() - crop.radius(),
-          y: crop.y() - crop.radius(),
-          width,
-          height,
-          pixelRatio,
-          mimeType: this.props.exportMimeType,
-          quality: this.props.exportQuality
-        });
+        cropWidth = crop.radius() * 2;
+        cropHeight = crop.radius() * 2;
+        cropX = crop.x() - crop.radius();
+        cropY = crop.y() - crop.radius();
       }
+
+      let cropSource = crop;
+      let xScale = 1;
+      let yScale = 1;
+      if (this.props.exportAsSquare || this.cropShape === 'rect') {
+        const fullSizeImage = new Konva.Image({ image: this.image });
+        cropSource = fullSizeImage;
+        xScale = fullSizeImage.width() / background.width();
+        yScale = fullSizeImage.height() / background.height();
+      }
+
+      const width = cropWidth * xScale;
+      const height = cropHeight * yScale;
+      const pixelRatio = this.props.exportSize ? this.props.exportSize / width : undefined;
+
+      return cropSource.toDataURL({
+        x: cropX * xScale,
+        y: cropY * yScale,
+        width,
+        height,
+        pixelRatio,
+        mimeType: this.props.exportMimeType,
+        quality: this.props.exportQuality
+      });
     };
 
     const onScaleCallback = (scaleY) => {
       const scale = scaleY > 0 || isNotOutOfScale(scaleY) ? scaleY : 0;
-      cropStroke.radius(cropStroke.radius() - calcScaleRadius(scale));
-      crop.radius(crop.radius() - calcScaleRadius(scale));
-      resize.fire('resize')
+      const scaleRadius = calcScaleRadius(scale);
+      if (this.cropShape === 'rect') {
+        cropStroke.width(cropStroke.width() - scaleRadius);
+        cropStroke.height(cropStroke.height() - scaleRadius);
+        cropStroke.x(cropStroke.x() + scaleRadius / 2);
+        cropStroke.y(cropStroke.y() + scaleRadius / 2);
+        crop.width(crop.width() - scaleRadius);
+        crop.height(crop.height() - scaleRadius);
+        crop.x(crop.x() + scaleRadius / 2);
+        crop.y(crop.y() + scaleRadius / 2);
+      } else {
+        cropStroke.radius(cropStroke.radius() - scaleRadius);
+        crop.radius(crop.radius() - scaleRadius);
+      }
+      resize.fire('resize');
     };
 
     this.onCropCallback(getPreview());
 
-    crop.on("dragmove", () => crop.fire('resize'));
-    crop.on("dragend", () => this.onCropCallback(getPreview()));
+    crop.on('dragmove', () => crop.fire('resize'));
+    crop.on('dragend', () => this.onCropCallback(getPreview()));
 
     crop.on('resize', () => {
       const x = isLeftCorner() ? calcLeft() : (isRightCorner() ? calcRight() : crop.x());
@@ -366,23 +437,23 @@ class Avatar extends React.Component {
       crop.x(x);
       cropStroke.x(x);
       crop.y(y);
-      cropStroke.y(y)
+      cropStroke.y(y);
     });
 
-    crop.on("mouseenter", () => stage.container().style.cursor = 'move');
-    crop.on("mouseleave", () => stage.container().style.cursor = 'default');
+    crop.on('mouseenter', () => stage.container().style.cursor = 'move');
+    crop.on('mouseleave', () => stage.container().style.cursor = 'default');
     crop.on('dragstart', () => stage.container().style.cursor = 'move');
     crop.on('dragend', () => stage.container().style.cursor = 'default');
 
-    resize.on("touchstart", (evt) => {
-      resize.on("dragmove", (dragEvt) => {
+    resize.on('touchstart', (evt) => {
+      resize.on('dragmove', (dragEvt) => {
         if (dragEvt.evt.type !== 'touchmove') return;
         const scaleY = (dragEvt.evt.changedTouches['0'].pageY - evt.evt.changedTouches['0'].pageY) || 0;
-        onScaleCallback(scaleY * this.mobileScaleSpeed)
-      })
+        onScaleCallback(scaleY * this.mobileScaleSpeed);
+      });
     });
 
-    resize.on("dragmove", (evt) => {
+    resize.on('dragmove', (evt) => {
       if (evt.evt.type === 'touchmove') return;
       const newMouseY = evt.evt.y;
       const ieScaleFactor = newMouseY ? (newMouseY - this.state.lastMouseY) : undefined;
@@ -390,21 +461,22 @@ class Avatar extends React.Component {
       this.setState({
         lastMouseY: newMouseY,
       });
-      onScaleCallback(scaleY)
+      onScaleCallback(scaleY);
+      crop.fire('resize');
     });
-    resize.on("dragend", () => this.onCropCallback(getPreview()));
+    resize.on('dragend', () => this.onCropCallback(getPreview()));
 
     resize.on('resize', () => moveResizer(crop.x(), crop.y()));
 
-    resize.on("mouseenter", () => stage.container().style.cursor = 'nesw-resize');
-    resize.on("mouseleave", () => stage.container().style.cursor = 'default');
+    resize.on('mouseenter', () => stage.container().style.cursor = 'nesw-resize');
+    resize.on('mouseleave', () => stage.container().style.cursor = 'default');
     resize.on('dragstart', (evt) => {
       this.setState({
         lastMouseY: evt.evt.y,
       });
-      stage.container().style.cursor = 'nesw-resize'
+      stage.container().style.cursor = 'nesw-resize';
     });
-    resize.on('dragend', () => stage.container().style.cursor = 'default')
+    resize.on('dragend', () => stage.container().style.cursor = 'default');
   }
 
   initStage() {
@@ -412,7 +484,7 @@ class Avatar extends React.Component {
       container: this.containerId,
       width: this.width,
       height: this.height
-    })
+    });
   }
 
   initBackground() {
@@ -422,7 +494,7 @@ class Avatar extends React.Component {
       width: this.width,
       height: this.height,
       image: this.image
-    })
+    });
   }
 
   initShading() {
@@ -434,10 +506,13 @@ class Avatar extends React.Component {
       fill: this.shadingColor,
       strokeWidth: 4,
       opacity: this.shadingOpacity
-    })
+    });
   }
 
   initCrop() {
+    if (this.cropShape === 'rect') {
+      return this.initRectCrop();
+    }
     return new Konva.Circle({
       x: this.halfWidth,
       y: this.halfHeight,
@@ -455,10 +530,35 @@ class Avatar extends React.Component {
       draggable: true,
       dashEnabled: true,
       dash: [10, 5]
-    })
+    });
+  }
+
+  initRectCrop() {
+    return new Konva.Rect({
+      x: this.halfWidth - this.cropRadius,
+      y: this.halfHeight - this.cropRadius,
+      width: this.cropRadius * 2,
+      height: this.cropRadius * 2,
+      fillPatternImage: this.image,
+      fillPatternOffset: {
+        x: (this.halfWidth - this.cropRadius) / this.scale,
+        y: (this.halfHeight - this.cropRadius) / this.scale,
+      },
+      fillPatternScale: {
+        x: this.scale,
+        y: this.scale
+      },
+      opacity: 1,
+      draggable: true,
+      dashEnabled: false,
+      dash: [10, 5]
+    });
   }
 
   initCropStroke() {
+    if (this.cropShape === 'rect') {
+      return this.initRectCropStroke();
+    }
     return new Konva.Circle({
       x: this.halfWidth,
       y: this.halfHeight,
@@ -468,13 +568,30 @@ class Avatar extends React.Component {
       strokeScaleEnabled: true,
       dashEnabled: true,
       dash: [10, 5]
-    })
+    });
+  }
+
+  initRectCropStroke() {
+    return new Konva.Rect({
+      x: this.halfWidth - this.cropRadius,
+      y: this.halfHeight - this.cropRadius,
+      width: this.cropRadius * 2,
+      height: this.cropRadius * 2,
+      stroke: this.cropColor,
+      strokeWidth: this.lineWidth / 2,
+      strokeScaleEnabled: true,
+      dashEnabled: true,
+      dash: [10, 5]
+    });
   }
 
   initResize() {
+    if (this.cropShape === 'rect') {
+      return this.initRectResize();
+    }
     return new Konva.Rect({
       x: this.halfWidth + this.cropRadius * 0.86 - 8,
-      y: this.halfHeight + this.cropRadius * -0.5 - 8,
+      y: this.halfHeight + this.cropRadius * -0.5 - 10,
       width: 16,
       height: 16,
       draggable: true,
@@ -482,12 +599,33 @@ class Avatar extends React.Component {
         return {
           x: this.getAbsolutePosition().x,
           y: pos.y
-        }
+        };
       }
-    })
+    });
+  }
+
+  initRectResize() {
+    const x = this.halfWidth + this.cropRadius - 8;
+    const y = this.halfHeight - this.cropRadius - 8;
+    return new Konva.Rect({
+      x,
+      y,
+      width: 16,
+      height: 16,
+      draggable: true,
+      dragBoundFunc: function (pos) {
+        return {
+          x: this.getAbsolutePosition().x,
+          y: pos.y
+        };
+      }
+    });
   }
 
   initResizeIcon() {
+    if (this.cropShape === 'rect') {
+      return this.initRectResizeIcon();
+    }
     return new Konva.Path({
       x: this.halfWidth + this.cropRadius * 0.86 - 8,
       y: this.halfHeight + this.cropRadius * -0.5 - 10,
@@ -497,7 +635,20 @@ class Avatar extends React.Component {
         x: 0.2,
         y: 0.2
       }
-    })
+    });
+  }
+
+  initRectResizeIcon() {
+    return new Konva.Path({
+      x: this.halfWidth + this.cropRadius - 8,
+      y: this.halfHeight - this.cropRadius - 10,
+      data: 'M47.624,0.124l12.021,9.73L44.5,24.5l10,10l14.661-15.161l9.963,12.285v-31.5H47.624z M24.5,44.5   L9.847,59.653L0,47.5V79h31.5l-12.153-9.847L34.5,54.5L24.5,44.5z',
+      fill: this.cropColor,
+      scale: {
+        x: 0.2,
+        y: 0.2
+      }
+    });
   }
 
   render() {
@@ -530,18 +681,14 @@ class Avatar extends React.Component {
       height: height || 200
     };
 
-    const closeBtnStyle = {
-      position: 'absolute',
-      zIndex: 999,
-      cursor: 'pointer',
-      left: '10px',
-      top: '10px'
+    const closeButtonStyle = {
+      all: 'unset',
+      ...this.props.closeButtonStyle,
     };
 
-    return (
-      <div>
-        {this.state.showLoader
-          ?
+    if (this.state.showLoader) {
+      return (
+        <div>
           <div style={borderStyle} onDragOver={this.onDragFile} onDrop={this.onDropFile}>
             <input
               onChange={this.onFileLoad}
@@ -553,28 +700,26 @@ class Avatar extends React.Component {
             />
             <label htmlFor={this.loaderId} style={labelStyle}>{label}</label>
           </div>
-          :
-          <div style={style}>
-            <svg
-              onClick={this.onCloseClick}
-              style={closeBtnStyle}
-              viewBox="0 0 475.2 475.2"
-              width="20px" height="20px">
-              <g>
-                <path
-                  d="M405.6,69.6C360.7,24.7,301.1,0,237.6,0s-123.1,24.7-168,69.6S0,174.1,0,237.6s24.7,123.1,69.6,168s104.5,69.6,168,69.6    s123.1-24.7,168-69.6s69.6-104.5,69.6-168S450.5,114.5,405.6,69.6z M386.5,386.5c-39.8,39.8-92.7,61.7-148.9,61.7    s-109.1-21.9-148.9-61.7c-82.1-82.1-82.1-215.7,0-297.8C128.5,48.9,181.4,27,237.6,27s109.1,21.9,148.9,61.7    C468.6,170.8,468.6,304.4,386.5,386.5z"
-                  fill={this.closeIconColor} />
-                <path
-                  d="M342.3,132.9c-5.3-5.3-13.8-5.3-19.1,0l-85.6,85.6L152,132.9c-5.3-5.3-13.8-5.3-19.1,0c-5.3,5.3-5.3,13.8,0,19.1    l85.6,85.6l-85.6,85.6c-5.3,5.3-5.3,13.8,0,19.1c2.6,2.6,6.1,4,9.5,4s6.9-1.3,9.5-4l85.6-85.6l85.6,85.6c2.6,2.6,6.1,4,9.5,4    c3.5,0,6.9-1.3,9.5-4c5.3-5.3,5.3-13.8,0-19.1l-85.4-85.6l85.6-85.6C347.6,146.7,347.6,138.2,342.3,132.9z"
-                  fill={this.closeIconColor} />
-              </g>
-            </svg>
-            <div id={this.containerId} />
-          </div>
-        }
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <div style={style}>
+          <button
+            type="button"
+            onClick={this.onCloseClick}
+            style={closeButtonStyle}
+            aria-label="Close"
+          >
+            {this.closeIcon}
+          </button>
+          <div id={this.containerId}/>
+        </div>
       </div>
-    )
+    );
   }
 }
 
-export default Avatar
+export default Avatar;

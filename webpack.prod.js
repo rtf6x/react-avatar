@@ -1,8 +1,6 @@
 const path = require('path');
-const webpack = require('webpack');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
-const CompressionPlugin = require("compression-webpack-plugin");
-// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+// const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+// const CompressionPlugin = require('compression-webpack-plugin');
 
 module.exports = {
   entry: './src/avatar.jsx',
@@ -31,9 +29,9 @@ module.exports = {
   },
   plugins: [
     // new BundleAnalyzerPlugin(),
-    new CompressionPlugin({
-      test: /\.js/
-    }),
-    new UglifyJSPlugin()
+    // new CompressionPlugin({
+    //   test: /\.js/
+    // }),
+    // new UglifyJSPlugin()
   ],
 };
