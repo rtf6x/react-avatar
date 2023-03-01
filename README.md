@@ -1,7 +1,7 @@
-# react-avatar
+# @rootfox/react-avatar
 👤 Load, crop and preview avatar with ReactJS component 
 
-[![npm version](https://badge.fury.io/js/react-avatar-edit.svg)](https://badge.fury.io/js/react-avatar-edit)
+[![npm version](https://badge.fury.io/js/@rootfox/react-avatar.svg)](https://badge.fury.io/js/@rootfox/react-avatar)
 
 ## Demo
 
@@ -11,14 +11,14 @@
 
 ## Install
 
-```npm i react-avatar-edit```
+```npm i @rootfox/react-avatar```
 
 ## Usage
 
 ```javascript
 import React from 'react'
 import ReactDOM from 'react-dom'
-import Avatar from 'react-avatar-edit'
+import Avatar from '@rootfox/react-avatar'
 
 class App extends React.Component {
 
