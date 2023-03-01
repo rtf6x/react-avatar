@@ -1,5 +1,5 @@
 {
-  "name": "react-avatar-edit",
+  "name": "react-avatar",
   "version": "1.0.0",
   "description": "ReactJS component to upload, crop, and preview avatars",
   "main": "lib/react-avatar.js",
