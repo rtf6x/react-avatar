@@ -1,13 +1,17 @@
 {
-  "name": "@rtf6x/react-avatar",
-  "version": "1.0.0",
+  "name": "@rootfox/react-avatar",
+  "version": "1.0.1",
   "description": "ReactJS component to upload, crop, and preview avatars",
   "main": "lib/react-avatar.js",
+  "private": false,
   "types": "src/avatar.d.ts",
   "scripts": {
     "start": "webpack-dev-server --open --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
     "build:example": "webpack --config webpack.example.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "license": "MIT",
   "keywords": [
