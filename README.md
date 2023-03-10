@@ -1,7 +1,7 @@
 # @rootfox/react-avatar
 👤 Load, crop and preview avatar with ReactJS component 
 
-[![npm version](https://badge.fury.io/js/@rootfox/react-avatar.svg)](https://badge.fury.io/js/@rootfox/react-avatar)
+[![npm version](https://badge.fury.io/js/%40rootfox%2Freact-avatar.svg)](https://badge.fury.io/js/%40rootfox%2Freact-avatar)
 
 ## Demo
 
