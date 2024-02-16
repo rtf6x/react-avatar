@@ -10,7 +10,6 @@ import 'konva/src/Animation';
 import 'konva/src/DragAndDrop';
 
 class Avatar extends React.Component {
-
   static defaultProps = {
     shadingColor: 'grey',
     shadingOpacity: 0.6,
@@ -211,10 +210,10 @@ class Avatar extends React.Component {
     image.crossOrigin = 'Anonymous';
     if (!this.props.img && this.props.src) image.src = this.props.src;
     this.setState({ image }, () => {
-      if (this.image.complete) return this.init();
+      if (this.image.complete) return this.init(image);
       this.image.onload = () => {
         this.onImageLoadCallback(this.image);
-        this.init();
+        this.init(image);
       };
     });
   }
@@ -238,7 +237,7 @@ class Avatar extends React.Component {
           file,
           function (image, data) {
             ref.setState({ image, file, showLoader: false });
-            ref.init();
+            ref.init(image);
           },
           { orientation: exifOrientation, meta: true }
         );
@@ -261,7 +260,7 @@ class Avatar extends React.Component {
         file,
         function (image, data) {
           ref.setState({ image, file, showLoader: false });
-          ref.init();
+          ref.init(image);
         },
         { orientation: exifOrientation, meta: true }
       );
@@ -272,10 +271,13 @@ class Avatar extends React.Component {
     this.setState({ showLoader: true }, () => this.onCloseCallback());
   }
 
-  init() {
+  init(image) {
+    if (!image) {
+      return;
+    }
     const { height, minCropRadius, cropRadius } = this.props;
-    const originalWidth = this.image.width;
-    const originalHeight = this.image.height;
+    const originalWidth = image?.width ?? this.width;
+    const originalHeight = image?.height ?? this.height;
     const ration = originalHeight / originalWidth;
     const { imageWidth, imageHeight } = this.props;
     let imgHeight;
@@ -337,8 +339,8 @@ class Avatar extends React.Component {
       calcRight = () => stage.width() - crop.width() - 1;
       calcBottom = () => stage.height() - crop.height() - 1;
       calcScaleRadius = scale => scaledRadius(scale) >= this.minCropRadius ? scale : 0;
-      calcResizerX = () => crop.x() + crop.width();
-      calcResizerY = () => crop.y();
+      calcResizerX = () => isLeftCorner() ? crop.width() : isRightCorner() ? layer.width() : crop.x() + crop.width();
+      calcResizerY = () => isTopCorner() ? calcTop() : isBottomCorner() ? calcBottom() : crop.y();
       isLeftCorner = () => crop.x() <= 0;
       isTopCorner = () => crop.y() <= 0;
       isRightCorner = () => crop.x() + crop.width() >= stage.width();

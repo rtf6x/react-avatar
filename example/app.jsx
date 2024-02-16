@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import Avatar from '../src/avatar.jsx'
 
 class App extends React.Component {
@@ -67,7 +67,7 @@ class App extends React.Component {
           <div className="col-2"/>
           <div className="col-5">
             <Avatar
-              cropShape={'rect'}
+              cropShape="rect"
               width={390}
               height={295}
               exportSize={390}
@@ -146,4 +146,10 @@ class App extends React.Component {
   }
 }
 
-ReactDOM.render(<App /> , document.getElementById('root'))
+const container = document.getElementById('root');
+if (!container) {
+  throw new Error('Root element not found');
+}
+const root = createRoot(container);
+
+root.render(<App />);
